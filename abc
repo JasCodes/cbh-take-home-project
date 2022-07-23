@@ -1,0 +1,42 @@
+const crypto = require("crypto");
+
+
+// Takes event in
+exports.deterministicPartitionKey = (event) => {
+  
+  const MAX_PARTITION_KEY_LENGTH = 256;
+  const TRIVIAL_PARTITION_KEY = "0";
+  
+  // If event object doesn't exist return "0" as default
+  if (!event) { 
+    return TRIVIAL_PARTITION_KEY;
+  }
+  
+  let candidate;
+
+  // If event is not undefined extract candidate from event object.
+  if (event.partitionKey) {
+      // If partitionKey exists on event object assign it to candidate
+    if (typeof candidate !== "string") {
+        candidate = JSON.stringify(candidate);
+    }
+    candidate = event.partitionKey;
+  } else {
+    // If partitionKey doen't exist, then convert event object to string and take SHA3-512 hash in hex and assign to candidate 
+    const data = JSON.stringify(event);
+    candidate = crypto.createHash("sha3-512").update(data).digest("hex");
+  }
+  
+  // if (candidate) {
+  //   if (typeof candidate !== "string") {
+  //     candidate = JSON.stringify(candidate);
+  //   }
+  // } else {
+  //   candidate = TRIVIAL_PARTITION_KEY;
+  // }
+
+  if (candidate.length > MAX_PARTITION_KEY_LENGTH) {
+    candidate = crypto.createHash("sha3-512").update(candidate).digest("hex");
+  }
+  return candidate;
+};
