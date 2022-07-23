@@ -9,3 +9,51 @@ You've been asked to refactor the function `deterministicPartitionKey` in [`dpk.
 You will be graded on the exhaustiveness and quality of your unit tests, the depth of your refactor, and the level of insight into your thought process provided by the written explanation.
 
 ## Your Explanation Here
+
+### Following are the things achieved in refactoring
+
+- Piping pattern: I am a big fan of functional programming languages like Elixir. Hence I am more disposed to piping and compositional patterns. Following this, the pipeline is constructed in code. The following logical pipeline is used in the solution.
+
+>
+>Pipeline
+>
+>|> Handle undefined event objects
+>
+>|> Handle undefined partitionKey
+>
+>|> Assign partitionKey
+>
+>|> Convert assignment to string if not
+>
+>|> Handle if assignment length is larger than allowed
+>
+
+- Reduced Complexity: Now there is no else statement or two-level nesting of conditional statements.
+
+- Added comments: Added comments better explaining the code.
+
+Other Notes:
+
+- Variable names are a big part of the documentation and readability aspects of code. Here the variable name was good enough for the most part.
+The null or empty object was not handled in the original logic so I left it out, otherwise, I would do the following for event and event.partitionKey. For example, the event object will have additional logic.
+
+```javascript
+if (!event) {
+    return TRIVIAL_PARTITION_KEY;
+}
+
+if (event === null || (typeof event === 'object' && Object.keys(event).length === 0) ) {
+    return TRIVIAL_PARTITION_KEY;
+}
+```
+
+Test
+
+```javscript
+it("Returns the literal '0' when given empty input object", () => {
+    const trivialKey = deterministicPartitionKey({});
+    expect(trivialKey).toBe("0");
+    const trivialKey2 = deterministicPartitionKey(null);
+    expect(trivialKey2).toBe("0");
+});
+```
